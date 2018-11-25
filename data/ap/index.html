@@ -1,0 +1,38 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" href="/fs/spectre.min.css"> -->
+    <link rel="stylesheet" href="spectre.min.css">
+    <title>ArtNetNode Captive Portal</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>ArtNetNode Setup Wifi</h2>
+        <form action="/wifi" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="input-ssid">SSID:</label>
+                <br/>
+                <input class="form-input" id="input-ssid" type="text" name="ssid" value="%SSID%" placeholder="SSID" maxlength="32" minlength="1">
+                <br>
+                <label class="form-label" for="input-password">Password:</label>
+                <br/>
+                <input class="form-input" id="input-password" type="text" name="password" value="%PASS%" placeholder="Password" maxlength="32">
+                <br>
+                <label class="form-label" for="input-host">Host name:</label>
+                <br/>
+                <input class="form-input" id="input-host" type="text" name="host" value="%HOST%" placeholder="Host name" maxlength="32">
+                <br>
+                <!-- TODO: create another page/tab/form -->
+                <label class="form-label" for="input-channel">DMX channel:</label>
+                <br/>
+                <input class="form-input" id="input-channel" type="number" name="channel" value="%CHANNEL%" placeholder="DMX channel" max="511" min="1">
+                <br>
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

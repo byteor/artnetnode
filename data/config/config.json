@@ -1,0 +1,6 @@
+{
+	"ssid":"ssid",
+	"pass":"",
+	"deviceName":"ArtNetNode",
+	"dmxChannel": 1
+}
