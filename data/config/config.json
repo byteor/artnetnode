@@ -1,6 +1,11 @@
 {
-	"ssid":"ssid",
-	"pass":"",
-	"deviceName":"ArtNetNode",
+	"wifi": [
+		{
+			"ssid": "Lom",
+			"pass": "qwerasdfzxcv",
+			"dhcp": true
+		}
+	],
+	"host": "ArtNetNode",
 	"dmxChannel": 1
 }

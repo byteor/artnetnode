@@ -1,3 +1,6 @@
+#ifndef STROBE_H
+#define STROBE_H
+
 #include <Arduino.h>
 
 // default strobe pulse length, ms
@@ -24,3 +27,5 @@ class Strobe
     void setInterval(int millis);
     void handle();
 };
+
+#endif

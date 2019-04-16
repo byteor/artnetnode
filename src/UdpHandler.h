@@ -26,13 +26,16 @@ class UdpHandler
     AsyncUDP *udp;
     Stream *serial;
     bool isFirst = true;
-    
+
     DmxCallbackFunction handler;
-    
+
     public:
     UdpHandler(Stream *serial);
     bool start(int port, DmxCallbackFunction fn);
     void handle(AsyncUDPPacket packet, uint8_t prevDmx[]);
-    
-	
+
+
+    // TODO: void broadcast(uint8_t *data, size_t len);
+
+
 };
