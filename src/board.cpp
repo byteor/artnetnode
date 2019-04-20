@@ -107,7 +107,7 @@ void Board::start()
         Serial.printf("%s", (const char *)data);
         if (final)
             Serial.printf("UploadEnd: %s (%u)\n", filename.c_str(), index + len);
-    });*/
+    });
     server->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         if (!index)
             Serial.printf("BodyStart: %u\n", total);
@@ -115,7 +115,7 @@ void Board::start()
         if (index + len == total)
             Serial.printf("BodyEnd: %u\n", total);
     });
-
+*/
     // Start web server
     server->on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
@@ -158,7 +158,8 @@ void Board::setupConfigPages()
 
     server->on("/config", HTTP_POST, [this](AsyncWebServerRequest *request) {
         Serial.println("POST /config");
-        //Serial.println(request->contentType());
+        Serial.println(request->contentType());
+
         //if(conf.deserialize(request->contentType)
         //List all parameters
         /*

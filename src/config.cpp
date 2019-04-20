@@ -15,16 +15,15 @@ void Config::load(String name)
     }
     else
     {
-        DeserializationError error = deserializeJson(jsonBuffer, file);
+        JsonObject &root = jsonBuffer.parseObject(file);
         file.close();
-        if (error == DeserializationError::Ok)
-        {
-            configFromJson();
-            Serial.println("config loaded");
+        if (!root.success()) {
+            Serial.println("JSON parse error");
         }
         else
         {
-            Serial.println("cannot parse config file");
+            configFromJson(root);
+            Serial.println("config loaded");
         }
     }
 }
@@ -39,9 +38,7 @@ void Config::save()
     }
     else
     {
-        DynamicJsonDocument doc(JSON_SIZE);
-        configToJson(doc);
-        serializeJsonPretty(doc, file);
+        configToJson(jsonBuffer).printTo(file);
         file.close();
         Serial.println("config file saved");
     }
@@ -49,58 +46,54 @@ void Config::save()
 
 void Config::serialize(String &to)
 {
-    configToJson(jsonBuffer);
-    serializeJsonPretty(jsonBuffer, to);
+    configToJson(jsonBuffer).printTo(to);
 }
 
 bool Config::deserialize(String from)
 {
-    DeserializationError error = deserializeJson(jsonBuffer, from);
-    if (error == DeserializationError::Ok)
-    {
-        configFromJson();
-        Serial.println("config loaded");
-        return true;
-    }
-    Serial.println("cannot parse config string");
-    return false;
+    JsonObject &root = jsonBuffer.parseObject(from);
+    configFromJson(root);
+    Serial.println("config loaded");
+    return true;
 }
 
-void Config::configToJson(JsonDocument &doc)
+JsonObject &Config::configToJson(JsonBuffer &doc)
 {
-    doc.clear();
-    // Network
-    doc["host"] = host;
+    JsonObject &root = doc.createObject();
 
-    JsonArray array = doc.createNestedArray("wifi");
+    // Network
+    root["host"] = host;
+
+    JsonArray &array = root.createNestedArray("wifi");
     for (int i = 0; i < min(wifiCount, MAX_NETWORKS); i++)
     {
-        JsonObject net = array.createNestedObject();
+        JsonObject &net = array.createNestedObject();
         net["ssid"] = wifi[i].ssid;
         net["pass"] = wifi[i].pass;
         net["dhcp"] = wifi[i].dhcp;
     }
     // DMX
-    array = doc.createNestedArray("dmx");
+    JsonArray &array2 = root.createNestedArray("dmx");
     for (int i = 0; i < min(dmxCount, MAX_DMX_CHANNELS); i++)
     {
-        JsonObject ch = array.createNestedObject();
+        JsonObject &ch = array2.createNestedObject();
         ch["channel"] = dmx[i].channel;
         ch["type"] = (int)dmx[i].type;
         ch["pin"] = dmx[i].pin;
         ch["pulse"] = dmx[i].pulse;
         ch["threshold"] = dmx[i].threshold;
     }
+    return root;
 }
 
-void Config::configFromJson()
+void Config::configFromJson(JsonObject &object)
 {
-    JsonObject object = jsonBuffer.as<JsonObject>();
     Serial.println("Parsing config...");
+    //object.prettyPrintTo(Serial);
     // Networks
-    host = String(object["host"].as<char *>());
+    host = object.get<String>("host");
     Serial.println("Host:" + host);
-    JsonArray nets = object["wifi"].as<JsonArray>();
+    JsonArray &nets = object["wifi"];
     for (WiFiNet net : wifi)
     {
         net.ssid = "";
@@ -109,20 +102,20 @@ void Config::configFromJson()
     }
     Serial.println("Networks found:" + String(nets.size(), DEC));
     wifiCount = 0;
-    for (JsonObject net : nets)
+    for (JsonObject &net : nets)
     {
         if (wifiCount < MAX_NETWORKS)
         {
-            wifi[wifiCount].ssid = String(net["ssid"].as<char *>());
-            wifi[wifiCount].pass = String(net["pass"].as<char *>());
-            wifi[wifiCount].dhcp = net["dhcp"].as<bool>();
+            wifi[wifiCount].ssid = net.get<String>("ssid");
+            wifi[wifiCount].pass = net.get<String>("pass");
+            wifi[wifiCount].dhcp = net.get<bool>("dhcp");
             Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
             wifiCount++;
         }
     }
 
     // DMX
-    JsonArray channels = object["dmx"].as<JsonArray>();
+    JsonArray &channels = object["dmx"];
     for (DmxChannel channel : dmx)
     {
         channel.channel = 0;
@@ -133,16 +126,18 @@ void Config::configFromJson()
     }
     dmxCount = 0;
     Serial.println("DMX found:" + String(channels.size(), DEC));
-    for (JsonObject channel : channels)
+    for (JsonObject &channel : channels)
     {
         if (dmxCount < MAX_DMX_CHANNELS && channel["type"] > 0)
         {
+            /*
             dmx[dmxCount].type = static_cast<DmxType>(channel["type"].as<int>());
             dmx[dmxCount].channel = channel["channel"].as<uint8_t>();
             dmx[dmxCount].threshold = channel["threshold"].as<uint8_t>();
             dmx[dmxCount].pin = channel["pin"].as<uint8_t>();
             dmx[dmxCount].pulse = channel["pulse"].as<uint16_t>();
             Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));
+            */
             dmxCount++;
         }
     }

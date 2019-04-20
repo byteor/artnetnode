@@ -37,10 +37,10 @@ class Config
 {
     const int JSON_SIZE = 1024;
     String fileName;
-    StaticJsonDocument<1024> jsonBuffer;
+    StaticJsonBuffer<1024> jsonBuffer;
   protected:
-    void configToJson(JsonDocument &doc);
-    void configFromJson();
+    JsonObject& configToJson(JsonBuffer &doc);
+    void configFromJson(JsonObject& object);
     int wifiCount;
     int dmxCount;
   public:
