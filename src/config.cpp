@@ -29,13 +29,51 @@ void Config::load(String name)
     }
 }
 
-void Config::configToJson()
+void Config::save()
 {
-    JsonObject object = jsonBuffer.as<JsonObject>();
+    Serial.println("saving board config...");
+    File file = SPIFFS.open(fileName, "w");
+    if (!file)
+    {
+        Serial.println("cannot save config file");
+    }
+    else
+    {
+        DynamicJsonDocument doc(JSON_SIZE);
+        configToJson(doc);
+        serializeJsonPretty(doc, file);
+        file.close();
+        Serial.println("config file saved");
+    }
+}
+
+void Config::serialize(String &to)
+{
+    configToJson(jsonBuffer);
+    serializeJsonPretty(jsonBuffer, to);
+}
+
+bool Config::deserialize(String from)
+{
+    DeserializationError error = deserializeJson(jsonBuffer, from);
+    if (error == DeserializationError::Ok)
+    {
+        configFromJson();
+        Serial.println("config loaded");
+        return true;
+    }
+    Serial.println("cannot parse config string");
+    return false;
+}
+
+void Config::configToJson(JsonDocument &doc)
+{
+    doc.clear();
     // Network
-    object["host"] = host;
-    JsonArray array = object.createNestedArray("wifi");
-    for (int i = 0; i < wifiCount; i++)
+    doc["host"] = host;
+
+    JsonArray array = doc.createNestedArray("wifi");
+    for (int i = 0; i < min(wifiCount, MAX_NETWORKS); i++)
     {
         JsonObject net = array.createNestedObject();
         net["ssid"] = wifi[i].ssid;
@@ -43,7 +81,16 @@ void Config::configToJson()
         net["dhcp"] = wifi[i].dhcp;
     }
     // DMX
-    jsonBuffer["dmxChannel"] = dmxChannel;
+    array = doc.createNestedArray("dmx");
+    for (int i = 0; i < min(dmxCount, MAX_DMX_CHANNELS); i++)
+    {
+        JsonObject ch = array.createNestedObject();
+        ch["channel"] = dmx[i].channel;
+        ch["type"] = (int)dmx[i].type;
+        ch["pin"] = dmx[i].pin;
+        ch["pulse"] = dmx[i].pulse;
+        ch["threshold"] = dmx[i].threshold;
+    }
 }
 
 void Config::configFromJson()
@@ -60,57 +107,43 @@ void Config::configFromJson()
         net.pass = "";
         net.dhcp = false;
     }
-    uint8_t netCount = 0;
     Serial.println("Networks found:" + String(nets.size(), DEC));
+    wifiCount = 0;
     for (JsonObject net : nets)
     {
-        if (netCount < MAX_NETWORKS)
+        if (wifiCount < MAX_NETWORKS)
         {
-            wifi[netCount].ssid = String(net["ssid"].as<char *>());
-            wifi[netCount].pass = String(net["pass"].as<char *>());
-            wifi[netCount].dhcp = net["dhcp"].as<bool>();
-            Serial.println("Networks[" + String(netCount, DEC) + "]: " + wifi[netCount].ssid + " " + wifi[netCount].pass);
-            netCount++;
+            wifi[wifiCount].ssid = String(net["ssid"].as<char *>());
+            wifi[wifiCount].pass = String(net["pass"].as<char *>());
+            wifi[wifiCount].dhcp = net["dhcp"].as<bool>();
+            Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
+            wifiCount++;
         }
     }
+
     // DMX
-    dmxChannel = object["dmxChannel"];
-    Serial.println("DMX channel:" + String(dmxChannel, DEC));
-}
-
-void Config::save()
-{
-    Serial.println("saving board config...");
-    File file = SPIFFS.open(fileName, "w");
-    if (!file)
+    JsonArray channels = object["dmx"].as<JsonArray>();
+    for (DmxChannel channel : dmx)
     {
-        Serial.println("cannot save config file");
+        channel.channel = 0;
+        channel.pin = 0;
+        channel.pulse = 0;
+        channel.type = DmxType::Disabled;
+        channel.threshold = 0;
     }
-    else
+    dmxCount = 0;
+    Serial.println("DMX found:" + String(channels.size(), DEC));
+    for (JsonObject channel : channels)
     {
-        configToJson();
-        serializeJsonPretty(jsonBuffer, file);
-        file.close();
-        Serial.println("config file saved");
-    }
-}
-
-void Config::serialize(String to)
-{
-    configToJson();
-    serializeJsonPretty(jsonBuffer, to);
-}
-
-void Config::deserialize(String from)
-{
-    DeserializationError error = deserializeJson(jsonBuffer, from);
-    if (error == DeserializationError::Ok)
-    {
-        configFromJson();
-        Serial.println("config loaded");
-    }
-    else
-    {
-        Serial.println("cannot parse config string");
+        if (dmxCount < MAX_DMX_CHANNELS && channel["type"] > 0)
+        {
+            dmx[dmxCount].type = static_cast<DmxType>(channel["type"].as<int>());
+            dmx[dmxCount].channel = channel["channel"].as<uint8_t>();
+            dmx[dmxCount].threshold = channel["threshold"].as<uint8_t>();
+            dmx[dmxCount].pin = channel["pin"].as<uint8_t>();
+            dmx[dmxCount].pulse = channel["pulse"].as<uint16_t>();
+            Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));
+            dmxCount++;
+        }
     }
 }

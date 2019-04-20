@@ -47,9 +47,8 @@ void Board::start()
 {
     Serial.begin(115200);
     Serial.println("");
-    Serial.setDebugOutput(true);
+    //Serial.setDebugOutput(true);
     SPIFFS.begin();
-
 
     // Parse config
     conf.load("config.json");
@@ -108,7 +107,7 @@ void Board::start()
         Serial.printf("%s", (const char *)data);
         if (final)
             Serial.printf("UploadEnd: %s (%u)\n", filename.c_str(), index + len);
-    });
+    });*/
     server->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         if (!index)
             Serial.printf("BodyStart: %u\n", total);
@@ -116,7 +115,7 @@ void Board::start()
         if (index + len == total)
             Serial.printf("BodyEnd: %u\n", total);
     });
-*/
+
     // Start web server
     server->on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
@@ -134,38 +133,33 @@ void Board::start()
     Serial.println("WWW is started up");
 }
 
-String Board::boardTemplatePprocessor(const String &var)
-{
-    /*
-    if (var == "SSID")
-        return ssid;
-    if (var == "PASS")
-        return pass;
-    if (var == "HOST")
-        return host;
-    if (templateProcessorCallback != NULL)
-        return templateProcessorCallback(var);
-        */
-    return String();
-
-}
-
 void Board::setupConfigPages()
 {
     server->serveStatic("/", SPIFFS, "/www/");
     server->serveStatic("/fs/", SPIFFS, "/fs/");
-    server->on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request) {
+/*     server->on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request) {
         request->send(SPIFFS, "/www/index.html", String(), false, [this](const String &var) { return boardTemplatePprocessor(var); });
-    });
+    }); */
     server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
-        request->send(SPIFFS, "/www/index.html", String(), false, [this](const String &var) { return boardTemplatePprocessor(var); });
+        Serial.println("YO:/");
+        AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "");
+        response->addHeader("Location", String("/index.html"));
+        request->send(response);
     });
 
-    server->on("/wifi", HTTP_GET, [this](AsyncWebServerRequest *request) {
-        //requet->send();
+    server->on("/config", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        Serial.println("GET /config");
+        String json;
+        conf.serialize(json);
+        Serial.println(json);
+        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", json);
+        request->send(response);
     });
 
-    server->on("/wifi", HTTP_POST, [this](AsyncWebServerRequest *request) {
+    server->on("/config", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        Serial.println("POST /config");
+        //Serial.println(request->contentType());
+        //if(conf.deserialize(request->contentType)
         //List all parameters
         /*
             int params = request->params();
@@ -186,6 +180,7 @@ void Board::setupConfigPages()
                 }
             }
             */
+           /*
         if (request->hasParam("ssid", true) && request->hasParam("password", true))
         {
             AsyncWebParameter *pSsid = request->getParam("ssid", true);
@@ -206,8 +201,8 @@ void Board::setupConfigPages()
             ESP.restart();
             return;
         }
-        AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "");
-        response->addHeader("Location", String("http://") + toStringIp(request->client()->localIP()));
+        */
+        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{}");
         request->send(response);
     });
 }
@@ -270,15 +265,6 @@ void Board::setSaveConfigCallback(SaveConfigCallback callback)
     saveConfigCallback = callback;
 }
 
-void Board::setTeplateProcessor(AwsTemplateProcessor processor)
-{
-    templateProcessorCallback = processor;
-}
-
-JsonDocument * Board::getJsonBuffer()
-{
-    return &jsonBuffer;
-}
 
 void Board::handle()
 {
@@ -286,58 +272,3 @@ void Board::handle()
     dns.processNextRequest();
 }
 
-void Board::loadConfig()
-{
-    /*
-    File file = SPIFFS.open("/config/board.json", "r");
-    if (!file)
-    {
-        Serial.println("no config file");
-    }
-    else
-    {
-        DeserializationError error = deserializeJson(jsonBuffer, file);
-        //JsonObject &root = jsonBuffer.parseObject(file);
-        file.close();
-        if (error == DeserializationError::Ok)
-        {
-            Serial.println("config loaded");
-            serializeJsonPretty(jsonBuffer, Serial);
-            strcpy(ssid, jsonBuffer["ssid"]);
-            strcpy(pass, jsonBuffer["pass"]);
-            strcpy(host, jsonBuffer["deviceName"]);
-        }
-        else
-        {
-            Serial.println("cannot parse config file");
-        }
-    }
-    */
-}
-
-void Board::saveConfig()
-{
-    /*
-    Serial.println("saving board config...");
-    Serial.print("ssid:");
-    Serial.println(ssid);
-    Serial.print("pass:");
-    Serial.println(pass);
-    Serial.print("host:");
-    Serial.println(host);
-    File file = SPIFFS.open("/config/board.json", "w");
-    if (!file)
-    {
-        Serial.println("cannot save config file");
-    }
-    else
-    {
-        jsonBuffer["ssid"] = ssid;
-        jsonBuffer["pass"] = pass;
-        jsonBuffer["deviceName"] = host;
-        serializeJsonPretty(jsonBuffer, file);
-        file.close();
-        Serial.println("config file saved");
-    }
-    */
-}

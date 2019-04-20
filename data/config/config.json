@@ -7,5 +7,12 @@
 		}
 	],
 	"host": "ArtNetNode",
-	"dmxChannel": 1
+	"dmxChannel": 1,
+	"dmx": [
+		{
+			"channel": 1,
+			"type": 1,
+			"threshold": 127
+		}
+	]
 }
