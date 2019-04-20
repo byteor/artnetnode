@@ -37,10 +37,11 @@ class Config
 {
     const int JSON_SIZE = 1024;
     String fileName;
-    StaticJsonBuffer<1024> jsonBuffer;
+    //StaticJsonBuffer<2048> jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
   protected:
     JsonObject& configToJson(JsonBuffer &doc);
-    void configFromJson(JsonObject& object);
+    bool configFromJson(JsonObject& object);
     int wifiCount;
     int dmxCount;
   public:
@@ -56,4 +57,5 @@ class Config
     void save();
     void serialize(String &to);
     bool deserialize(String from);
+    bool deserialize(JsonObject& object);
 };

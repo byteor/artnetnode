@@ -1,4 +1,5 @@
 #include "board.h"
+#include "AsyncJson.h"
 
 // TODO: 1. add LED mode indicator
 // TODO: 2. reset button to enforce Captive Portal (AP mode)
@@ -70,10 +71,10 @@ void Board::start()
     Serial.println();
     printWifiStatus();
 
-    // Start mDNS
-    MDNS.addService("http", "tcp", 80);
-    MDNS.begin(conf.host);
-    Serial.println("mdns is set up: " + conf.host);
+    // Start mDNS // *** SUPER _ MEGA _ EVIL ***
+    //MDNS.addService("http", "tcp", 80);
+    //MDNS.begin(conf.host);
+    //Serial.println("mdns is set up: " + conf.host);
     // OTA
     //Send OTA events to the browser
     /*
@@ -121,19 +122,13 @@ void Board::start()
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    server->addHandler(events);
-
-    setupConfigPages();
-
-    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/rest/endpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
-        JsonObject& jsonObj = json.as<JsonObject>();
-
-    });
-    server->addHandler(handler);
+    //server->addHandler(events);
 
     server->onNotFound([](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Not found");
     });
+
+    setupConfigPages();
 
     server->begin();
     Serial.println("WWW is started up");
@@ -143,9 +138,6 @@ void Board::setupConfigPages()
 {
     server->serveStatic("/", SPIFFS, "/www/");
     server->serveStatic("/fs/", SPIFFS, "/fs/");
-/*     server->on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request) {
-        request->send(SPIFFS, "/www/index.html", String(), false, [this](const String &var) { return boardTemplatePprocessor(var); });
-    }); */
     server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
         Serial.println("YO:/");
         AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "");
@@ -162,56 +154,31 @@ void Board::setupConfigPages()
         request->send(response);
     });
 
-    server->on("/config", HTTP_POST, [this](AsyncWebServerRequest *request) {
-        Serial.println("POST /config");
-        Serial.println(request->contentType());
-
-        //if(conf.deserialize(request->contentType)
-        //List all parameters
-        /*
-            int params = request->params();
-            for (int i = 0; i < params; i++)
-            {
-                AsyncWebParameter *p = request->getParam(i);
-                if (p->isFile())
-                { //p->isPost() is also true
-                    Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
-                }
-                else if (p->isPost())
-                {
-                    Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                }
-                else
-                {
-                    Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                }
-            }
-            */
-           /*
-        if (request->hasParam("ssid", true) && request->hasParam("password", true))
+    // TODO: !
+    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/config", [this](AsyncWebServerRequest *request, JsonVariant &json) {
+        JsonObject& jsonObj = json.as<JsonObject>();
+        Serial.printf("%s %s\r\n", request->methodToString(), request->url().c_str());
+        String text;
+        jsonObj.prettyPrintTo(text);
+        Serial.println(text);
+        int status = 200;
+        if(conf.deserialize(jsonObj))
         {
-            AsyncWebParameter *pSsid = request->getParam("ssid", true);
-            AsyncWebParameter *pPwd = request->getParam("password", true);
-            //strcpy(ssid, pSsid->value().c_str());
-            //strcpy(pass, pPwd->value().c_str());
-            //if (request->hasParam("host", true))
-            //    strcpy(host, request->getParam("host", true)->value().c_str());
-            AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "OK");
-            response->addHeader("Connection", "close");
-            response->addHeader("Location", String("/"));
-            request->send(response);
-            saveConfig();
-            if (saveConfigCallback != NULL)
-                saveConfigCallback(request);
-            Serial.println("Restarting...");
-            delay(200);
-            ESP.restart();
-            return;
+            Serial.println("Updating config!");
+            conf.save();
         }
-        */
-        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{}");
+        else
+        {
+            status = 400;
+            Serial.println("Invalid config!");
+        }
+
+        AsyncWebServerResponse *response = request->beginResponse(status, "application/json", text);
         request->send(response);
     });
+    handler->setMethod(HTTP_POST);
+    server->addHandler(handler);
+
 }
 
 // Captive Portal
@@ -276,6 +243,6 @@ void Board::setSaveConfigCallback(SaveConfigCallback callback)
 void Board::handle()
 {
     //ArduinoOTA.handle();
-    dns.processNextRequest();
+    //dns.processNextRequest();
 }
 

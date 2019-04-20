@@ -52,13 +52,16 @@ void Config::serialize(String &to)
 bool Config::deserialize(String from)
 {
     JsonObject &root = jsonBuffer.parseObject(from);
-    configFromJson(root);
-    Serial.println("config loaded");
-    return true;
+    return root.success() && configFromJson(root);
+}
+bool Config::deserialize(JsonObject &root)
+{
+    return root.success() && configFromJson(root);
 }
 
 JsonObject &Config::configToJson(JsonBuffer &doc)
 {
+    jsonBuffer.clear();
     JsonObject &root = doc.createObject();
 
     // Network
@@ -86,10 +89,9 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
     return root;
 }
 
-void Config::configFromJson(JsonObject &object)
+bool Config::configFromJson(JsonObject &object)
 {
     Serial.println("Parsing config...");
-    //object.prettyPrintTo(Serial);
     // Networks
     host = object.get<String>("host");
     Serial.println("Host:" + host);
@@ -130,15 +132,14 @@ void Config::configFromJson(JsonObject &object)
     {
         if (dmxCount < MAX_DMX_CHANNELS && channel["type"] > 0)
         {
-            /*
-            dmx[dmxCount].type = static_cast<DmxType>(channel["type"].as<int>());
-            dmx[dmxCount].channel = channel["channel"].as<uint8_t>();
-            dmx[dmxCount].threshold = channel["threshold"].as<uint8_t>();
-            dmx[dmxCount].pin = channel["pin"].as<uint8_t>();
-            dmx[dmxCount].pulse = channel["pulse"].as<uint16_t>();
+            dmx[dmxCount].type = static_cast<DmxType>(channel.get<int>("type"));
+            dmx[dmxCount].channel = channel.get<uint8_t>("channel");
+            dmx[dmxCount].threshold = channel.get<uint8_t>("threshold");
+            dmx[dmxCount].pin = channel.get<uint8_t>("pin");
+            dmx[dmxCount].pulse = channel.get<uint16_t>("pulse");
             Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));
-            */
             dmxCount++;
         }
     }
+    return host && (dmxCount + wifiCount) > 0;
 }
