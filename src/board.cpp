@@ -125,6 +125,12 @@ void Board::start()
 
     setupConfigPages();
 
+    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/rest/endpoint", [](AsyncWebServerRequest *request, JsonVariant &json) {
+        JsonObject& jsonObj = json.as<JsonObject>();
+
+    });
+    server->addHandler(handler);
+
     server->onNotFound([](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Not found");
     });
