@@ -1,4 +1,8 @@
 {
+	"host": "ArtNetNode",
+	"hw": {
+		"freq": 300
+	},
 	"wifi": [
 		{
 			"ssid": "Lom",
@@ -6,13 +10,14 @@
 			"dhcp": true
 		}
 	],
-	"host": "ArtNetNode",
-	"dmxChannel": 1,
 	"dmx": [
 		{
 			"channel": 1,
-			"type": 1,
-			"threshold": 127
+			"type": 2,
+			"pin": 2,
+			"pulse": 20,
+			"threshold": 127,
+			"multiplier": 5
 		}
 	]
 }

@@ -11,6 +11,7 @@
 
 #include "strobe.h"
 #include "config.h"
+#include "UdpHandler.h"
 
 /*
 #ifdef ESP8266
@@ -20,6 +21,8 @@ extern "C"
 }
 #endif
 */
+#define UDP_PORT 6454 // ArtNet UDP port
+
 typedef std::function<void(AsyncWebServerRequest *request)> SaveConfigCallback;
 
 class Board
@@ -27,9 +30,12 @@ class Board
     Config conf;
 
 protected:
+    bool isRestartPending = false;
     const uint16_t WWW_PORT = 80;
     AsyncWebServer *server = new AsyncWebServer(WWW_PORT);
     DNSServer dns;
+    Strobe *strobes[MAX_DMX_CHANNELS];
+    UdpHandler *udpHandler;
     // DNS server
     const byte DNS_PORT = 53;
 
@@ -57,4 +63,5 @@ public:
     void handle();
     void init();
     void start();
+    void restart();
 };

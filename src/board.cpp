@@ -6,6 +6,7 @@
 
 Board::Board()
 {
+    udpHandler = new UdpHandler(&Serial);
 }
 
 bool Board::isIp(String str)
@@ -44,6 +45,11 @@ void Board::printWifiStatus()
     Serial.println(ip);
 }
 
+void Board::restart()
+{
+    isRestartPending = true;
+}
+
 void Board::start()
 {
     Serial.begin(115200);
@@ -56,9 +62,9 @@ void Board::start()
 
     // Start a captive portal if can't connect to WiFi
     bool connected = false;
-    for(uint8_t counter = 0; counter < MAX_NETWORKS; counter++)
+    for (uint8_t counter = 0; counter < MAX_NETWORKS; counter++)
     {
-        if(conf.wifi[counter].ssid.length() > 1 && conectWiFi(conf.wifi[counter].ssid, conf.wifi[counter].pass, conf.host))
+        if (conf.wifi[counter].ssid.length() > 1 && conectWiFi(conf.wifi[counter].ssid, conf.wifi[counter].pass, conf.host))
         {
             connected = true;
             break;
@@ -71,10 +77,10 @@ void Board::start()
     Serial.println();
     printWifiStatus();
 
-    // Start mDNS // *** SUPER _ MEGA _ EVIL ***
-    //MDNS.addService("http", "tcp", 80);
-    //MDNS.begin(conf.host);
-    //Serial.println("mdns is set up: " + conf.host);
+    // Start mDNS
+    MDNS.addService("http", "tcp", 80);
+    MDNS.begin(conf.host);
+    Serial.println("mDNS is set up: " + conf.host);
     // OTA
     //Send OTA events to the browser
     /*
@@ -100,29 +106,13 @@ void Board::start()
     ArduinoOTA.setHostname(conf.host.c_str());
     ArduinoOTA.begin();
     Serial.println("OTA is set up");
+   server->addHandler(events);
 
-
-    server->onFileUpload([](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {
-        if (!index)
-            Serial.printf("UploadStart: %s\n", filename.c_str());
-        Serial.printf("%s", (const char *)data);
-        if (final)
-            Serial.printf("UploadEnd: %s (%u)\n", filename.c_str(), index + len);
-    });
-    server->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-        if (!index)
-            Serial.printf("BodyStart: %u\n", total);
-        Serial.printf("%s", (const char *)data);
-        if (index + len == total)
-            Serial.printf("BodyEnd: %u\n", total);
-    });
 */
     // Start web server
     server->on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
-
-    //server->addHandler(events);
 
     server->onNotFound([](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "Not found");
@@ -132,6 +122,71 @@ void Board::start()
 
     server->begin();
     Serial.println("WWW is started up");
+
+    // PWM parameters
+    analogWriteRange(255);
+    if (conf.hardware.pwmFreq)
+    {
+        analogWriteFreq(conf.hardware.pwmFreq);
+    }
+    // DMX
+    for (int i = 0; i < MAX_DMX_CHANNELS; i++)
+    {
+        DmxChannel ch = conf.dmx[i];
+        if (ch.type != DmxType::Disabled)
+        {
+            strobes[i] = new Strobe(ch.pin, ch.pulse, LOW, ch.type == DmxType::Dimmable);
+        }
+        else
+        {
+            strobes[i] = NULL;
+        }
+    }
+
+    if (!udpHandler->start(UDP_PORT, [this](int channel, int value) {
+            Serial.print("[");
+            Serial.print(channel + 1);
+            Serial.print("]=");
+            Serial.print(value);
+            Serial.println();
+
+            for (int i = 0; i < MAX_DMX_CHANNELS; i++)
+            {
+                // data array is zero-based when DMX channels start with "1"
+                // First channel controls the main light 'ON/OFF' or 'Dimmer'
+                // The second channel controls stroboscope
+                DmxChannel ch = conf.dmx[i];
+                if (channel == ch.channel - 1 && ch.type != DmxType::Disabled)
+                {
+                    if (ch.type == DmxType::Binary)
+                    {
+                        if (value >= ch.threshold)
+                        {
+                            Serial.println("ON");
+                            strobes[i]->start();
+                        }
+                        else
+                        {
+                            Serial.println("OFF");
+                            strobes[i]->stop();
+                        }
+                    }
+                    else if (ch.type == DmxType::Dimmable)
+                    {
+                        Serial.printf("Level: %d\r\n", value);
+                        value == 0 ? strobes[i]->stop() : strobes[i]->start(value);
+                    }
+                }
+                if (channel == ch.channel && ch.pulse > 0)
+                {
+                    strobes[i]->setDuration(ch.pulse);
+                    strobes[i]->setInterval(value * ch.multiplier);
+                }
+            }
+        }))
+    {
+        Serial.print("couldn't start UDP");
+    }
 }
 
 void Board::setupConfigPages()
@@ -154,18 +209,18 @@ void Board::setupConfigPages()
         request->send(response);
     });
 
-    // TODO: !
-    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/config", [this](AsyncWebServerRequest *request, JsonVariant &json) {
-        JsonObject& jsonObj = json.as<JsonObject>();
+    AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/config", [this](AsyncWebServerRequest *request, JsonVariant &json) {
+        JsonObject &jsonObj = json.as<JsonObject>();
         Serial.printf("%s %s\r\n", request->methodToString(), request->url().c_str());
         String text;
         jsonObj.prettyPrintTo(text);
         Serial.println(text);
         int status = 200;
-        if(conf.deserialize(jsonObj))
+        if (conf.deserialize(jsonObj))
         {
             Serial.println("Updating config!");
             conf.save();
+            restart();
         }
         else
         {
@@ -178,7 +233,6 @@ void Board::setupConfigPages()
     });
     handler->setMethod(HTTP_POST);
     server->addHandler(handler);
-
 }
 
 // Captive Portal
@@ -206,6 +260,12 @@ void Board::startCaptivePortal()
     while (true)
     {
         dns.processNextRequest();
+        if (isRestartPending)
+        {
+            Serial.println("Reboot...");
+            delay(200);
+            ESP.restart();
+        }
     }
 }
 
@@ -239,10 +299,16 @@ void Board::setSaveConfigCallback(SaveConfigCallback callback)
     saveConfigCallback = callback;
 }
 
-
 void Board::handle()
 {
     //ArduinoOTA.handle();
-    //dns.processNextRequest();
+    if (isRestartPending)
+    {
+        Serial.println("Reboot...");
+        delay(200);
+        ESP.restart();
+    }
+    for (Strobe *strobe : strobes)
+        if (strobe)
+            strobe->handle();
 }
-

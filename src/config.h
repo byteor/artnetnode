@@ -28,10 +28,18 @@ typedef struct
     uint8_t threshold;
     // Strobe pulse length
     uint16_t pulse;
+    // Strobe period multiplier
+    uint16_t multiplier;
     // Pin
     uint8_t pin;
 } DmxChannel;
 #define MAX_DMX_CHANNELS 4
+
+typedef struct
+{
+  // PWM frequency
+  uint16_t  pwmFreq = 200;  // ESP8266 default is 1000 which may cause MOSFER overheat
+} HardwareConfig;
 
 class Config
 {
@@ -50,6 +58,7 @@ class Config
     // WiFi
     WiFiNet wifi[MAX_NETWORKS];
     String host;
+    HardwareConfig hardware;
 
     Config();
 

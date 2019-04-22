@@ -11,11 +11,11 @@ extern "C"
 
 // TODO: 1. handle button to reset configuration
 
-#include "UdpHandler.h"
-#include "strobe.h"
+//#include "UdpHandler.h"
+//#include "strobe.h"
 #include "board.h"
 
-UdpHandler udpHandler(&Serial);
+//UdpHandler udpHandler(&Serial);
 
 int LED_PIN = 5;
 Strobe strobe(LED_PIN);

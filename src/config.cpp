@@ -64,9 +64,12 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
     jsonBuffer.clear();
     JsonObject &root = doc.createObject();
 
+    // Hardware
+    JsonObject &hw = root.createNestedObject("hw");
+    hw["freq"] = hardware.pwmFreq;
+
     // Network
     root["host"] = host;
-
     JsonArray &array = root.createNestedArray("wifi");
     for (int i = 0; i < min(wifiCount, MAX_NETWORKS); i++)
     {
@@ -84,6 +87,7 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
         ch["type"] = (int)dmx[i].type;
         ch["pin"] = dmx[i].pin;
         ch["pulse"] = dmx[i].pulse;
+        ch["multiplier"] = dmx[i].multiplier;
         ch["threshold"] = dmx[i].threshold;
     }
     return root;
@@ -125,6 +129,7 @@ bool Config::configFromJson(JsonObject &object)
         channel.pulse = 0;
         channel.type = DmxType::Disabled;
         channel.threshold = 0;
+        channel.multiplier = 0;
     }
     dmxCount = 0;
     Serial.println("DMX found:" + String(channels.size(), DEC));
@@ -137,9 +142,13 @@ bool Config::configFromJson(JsonObject &object)
             dmx[dmxCount].threshold = channel.get<uint8_t>("threshold");
             dmx[dmxCount].pin = channel.get<uint8_t>("pin");
             dmx[dmxCount].pulse = channel.get<uint16_t>("pulse");
+            dmx[dmxCount].multiplier = channel.get<uint16_t>("multiplier");
             Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));
             dmxCount++;
         }
     }
+    // HW
+    JsonObject &hw = object["hw"];
+    hardware.pwmFreq = hw.get<uint16_t>("freq");
     return host && (dmxCount + wifiCount) > 0;
 }
