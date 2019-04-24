@@ -22,8 +22,7 @@ extern "C"
 #endif
 */
 #define UDP_PORT 6454 // ArtNet UDP port
-
-typedef std::function<void(AsyncWebServerRequest *request)> SaveConfigCallback;
+#define CONFIG_FILE "config.json"
 
 class Board
 {
@@ -43,8 +42,6 @@ protected:
 
     AsyncEventSource *events = new AsyncEventSource("/events");
 
-    SaveConfigCallback saveConfigCallback;
-
     bool conectWiFi(String ssid, String pass, String host);
     bool isIp(String str);
     String toStringIp(IPAddress ip);
@@ -57,8 +54,6 @@ public:
     void printWifiStatus();
 
     String getHostName();
-
-    void setSaveConfigCallback(SaveConfigCallback callback);
 
     void handle();
     void init();

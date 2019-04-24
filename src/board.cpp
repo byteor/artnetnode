@@ -58,7 +58,7 @@ void Board::start()
     SPIFFS.begin();
 
     // Parse config
-    conf.load("config.json");
+    conf.load(CONFIG_FILE);
 
     // Start a captive portal if can't connect to WiFi
     bool connected = false;
@@ -209,22 +209,29 @@ void Board::setupConfigPages()
         request->send(response);
     });
 
+    server->on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{\"status\": \"OK\"}");
+        request->send(response);
+        restart();
+    });
+
     AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/config", [this](AsyncWebServerRequest *request, JsonVariant &json) {
         JsonObject &jsonObj = json.as<JsonObject>();
         Serial.printf("%s %s\r\n", request->methodToString(), request->url().c_str());
         String text;
-        jsonObj.prettyPrintTo(text);
-        Serial.println(text);
         int status = 200;
-        if (conf.deserialize(jsonObj))
+        Config tempConf;
+        tempConf.load(CONFIG_FILE);
+        if (tempConf.deserialize(jsonObj))
         {
-            Serial.println("Updating config!");
-            conf.save();
-            restart();
+            tempConf.save();
+            tempConf.serialize(text);
+            Serial.println(text);
         }
         else
         {
             status = 400;
+            jsonObj.prettyPrintTo(text);
             Serial.println("Invalid config!");
         }
 
@@ -233,6 +240,33 @@ void Board::setupConfigPages()
     });
     handler->setMethod(HTTP_POST);
     server->addHandler(handler);
+
+    AsyncCallbackJsonWebHandler *wifiHandler = new AsyncCallbackJsonWebHandler("/wifi", [this](AsyncWebServerRequest *request, JsonVariant &json) {
+        JsonObject &jsonObj = json.as<JsonObject>();
+        Serial.printf("%s %s\r\n", request->methodToString(), request->url().c_str());
+        String text;
+        int status = 200;
+        Config tempConf;
+        tempConf.load(CONFIG_FILE);
+        if (tempConf.deserialize(jsonObj))
+        {
+            tempConf.save();
+            tempConf.serialize(text);
+            Serial.println(text);
+        }
+        else
+        {
+            status = 400;
+            jsonObj.prettyPrintTo(text);
+            Serial.println("Invalid config!");
+        }
+
+        AsyncWebServerResponse *response = request->beginResponse(status, "application/json", text);
+        request->send(response);
+    });
+    wifiHandler->setMethod(HTTP_POST);
+    server->addHandler(wifiHandler);
+
 }
 
 // Captive Portal
@@ -292,11 +326,6 @@ bool Board::conectWiFi(String ssid, String pass, String host)
     }
     Serial.println();
     return true;
-}
-
-void Board::setSaveConfigCallback(SaveConfigCallback callback)
-{
-    saveConfigCallback = callback;
 }
 
 void Board::handle()

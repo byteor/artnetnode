@@ -105,7 +105,7 @@ void Strobe::start(uint8_t value)
         if(enabled && dimmable && state == activeState)
         {
             // if it is currently ON adjust the PWM value
-            analogWrite(pin, adjustedInactiveValue);
+            analogWrite(pin, adjustedActiveValue);
         }
     }
     if(!enabled)
