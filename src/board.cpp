@@ -114,11 +114,11 @@ void Board::start()
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
 
-    server->onNotFound([](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Not found");
-    });
-
     setupConfigPages();
+
+    server->onNotFound([](AsyncWebServerRequest *request) {
+        request->send(404, "text/plain", "Not found");
+    });
 
     server->begin();
     Serial.println("WWW is started up");

@@ -1,6 +1,6 @@
 {
-  "name": "test-def",
-  "short_name": "test-def",
+  "name": "mdl1",
+  "short_name": "mdl1",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
