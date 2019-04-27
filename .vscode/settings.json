@@ -64,5 +64,9 @@
         "typeinfo": "cpp",
         "valarray": "cpp"
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/andrey/.platformio/penv/bin:/home/andrey/.platformio/penv:/home/andrey/.nvm/versions/node/v11.7.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games",
+        "PLATFORMIO_CALLER": "vscode"
+    }
 }

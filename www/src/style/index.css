@@ -62,7 +62,13 @@ button.mdc-fab {
   background-color: #444;
 }
 button.mdc-fab.mdc-theme--primary-bg {
-  background-color: #673ab8;
+  background-color: #6200ee;
+}
+button.mdc-button--raised.mdc-theme--secondary-bg {
+  background-color: #da00ee;
+}
+button.mdc-button--raised:not(:disabled) {
+/*  background-color: var(--mdc-theme-secondary, #da00ee);*/
 }
 li.mdc-list-item {
   padding-left: 0px;

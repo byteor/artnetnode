@@ -7,7 +7,7 @@ const webpack = require('webpack');
 module.exports = (config, env, helpers) => {
 	// build with yarn build -p --no-prerender
 	if (env.production) {
-		let [ plugin ] = helpers.getPluginsByName(config, 'UglifyJsPlugin');
+		let [plugin] = helpers.getPluginsByName(config, 'UglifyJsPlugin');
 		config.plugins.push(
 			new webpack.optimize.LimitChunkCountPlugin({
 				maxChunks: 1
@@ -16,7 +16,8 @@ module.exports = (config, env, helpers) => {
 		if (plugin && plugin.length) {
 			plugin.plugin.options.sourceMap = false;
 			plugin.plugin.options.comments = false;
-		} else {
+		}
+		else {
 			config.plugins.push(
 				new webpack.optimize.UglifyJsPlugin({
 					sourceMap: false
