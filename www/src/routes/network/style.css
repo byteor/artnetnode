@@ -1,23 +1,5 @@
 .home {
-	padding: 20px;
-	min-height: 100%;
-	width: 100%;
-}
-
-.cardHeader {
-  padding: 16px;
-}
-
-.card {
-  margin-bottom: 8px;
-}
-
-.cardBody {
-  padding: 16px;
-}
-
-.fabAdd {
-	position: fixed;
-	bottom: 10px;
-	right: 10px;
+  padding: 20px;
+  min-height: 100%;
+  width: 100%;
 }

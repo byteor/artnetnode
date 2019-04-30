@@ -9,7 +9,7 @@ import 'preact-material-components/Fab/style.css';
 
 import List from 'preact-material-components/List';
 import 'preact-material-components/List/style.css';
-//import 'preact-material-components/Menu/style.css';
+import 'preact-material-components/Menu/style.css';
 
 import Dialog from 'preact-material-components/Dialog';
 import 'preact-material-components/Dialog/style.css';

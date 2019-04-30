@@ -36,7 +36,7 @@ class App extends Component {
         <Header selectedRoute={this.state.currentUrl} />
         <Router onChange={this.handleRoute}>
           <Home path="/" />
-          <Network path="/net" />
+          {/* <Network path="/net" /> */}
           <WiFi path="/wifi" />
           <Hardware path="/hardware" />
           <DMX path="/dmx" />

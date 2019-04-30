@@ -1,8 +1,13 @@
 .home {
-	padding: 20px;
-	min-height: 100%;
-	width: 100%;
+  padding: 20px;
+  min-height: 100%;
+  width: 100%;
 }
+
+.warning {
+  color: #ee3000;
+}
+
 
 .cardHeader {
   padding: 16px;
@@ -11,3 +16,17 @@
 .cardBody {
   padding: 16px;
 }
+/*
+span.textContainer.mdc-list--two-line {
+	width: 100%;
+	align-self: center;
+}
+.primaryText {
+  display: flex;
+  justify-content: stretch;
+}
+
+.primaryText div {
+  flex: 1;
+}
+*/

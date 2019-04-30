@@ -80,10 +80,10 @@ export default class Header extends Component {
               <List.ItemGraphic>home</List.ItemGraphic>
               Dashboard
             </Drawer.DrawerItem>
-            <Drawer.DrawerItem selected={props.selectedRoute === '/net'} onClick={this.goToNetwork}>
+{/*             <Drawer.DrawerItem selected={props.selectedRoute === '/net'} onClick={this.goToNetwork}>
               <List.ItemGraphic>settings_ethernet</List.ItemGraphic>
               Network
-            </Drawer.DrawerItem>
+            </Drawer.DrawerItem> */}
             <Drawer.DrawerItem selected={props.selectedRoute === '/wifi'} onClick={this.goToWiFi}>
               <List.ItemGraphic>wifi</List.ItemGraphic>
               WiFi
@@ -94,7 +94,7 @@ export default class Header extends Component {
             </Drawer.DrawerItem>
             <Drawer.DrawerItem selected={props.selectedRoute === '/hardware'} onClick={this.goToHW}>
               <List.ItemGraphic>developer_board</List.ItemGraphic>
-              Hardware
+              Board
             </Drawer.DrawerItem>
           </Drawer.DrawerContent>
         </Drawer>

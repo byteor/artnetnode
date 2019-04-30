@@ -4,10 +4,6 @@
 	width: 100%;
 }
 
-.cardHeader {
-  padding: 16px;
-}
-
-.cardBody {
-  padding: 16px;
+.warning {
+  color: #ee3000;
 }
