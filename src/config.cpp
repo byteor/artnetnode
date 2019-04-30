@@ -86,6 +86,7 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
         ch["channel"] = dmx[i].channel;
         ch["type"] = (int)dmx[i].type;
         ch["pin"] = dmx[i].pin;
+        ch["level"] = dmx[i].level;
         ch["pulse"] = dmx[i].pulse;
         ch["multiplier"] = dmx[i].multiplier;
         ch["threshold"] = dmx[i].threshold;
@@ -127,6 +128,7 @@ bool Config::configFromJson(JsonObject &object)
         channel.channel = 0;
         channel.pin = 0;
         channel.pulse = 0;
+        channel.level = LOW;
         channel.type = DmxType::Disabled;
         channel.threshold = 0;
         channel.multiplier = 0;
@@ -141,6 +143,7 @@ bool Config::configFromJson(JsonObject &object)
             dmx[dmxCount].channel = channel.get<uint8_t>("channel");
             dmx[dmxCount].threshold = channel.get<uint8_t>("threshold");
             dmx[dmxCount].pin = channel.get<uint8_t>("pin");
+            dmx[dmxCount].level = channel.get<uint8_t>("level");    // only the least bit counts
             dmx[dmxCount].pulse = channel.get<uint16_t>("pulse");
             dmx[dmxCount].multiplier = channel.get<uint16_t>("multiplier");
             Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));

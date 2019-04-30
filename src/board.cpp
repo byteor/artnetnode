@@ -135,7 +135,7 @@ void Board::start()
         DmxChannel ch = conf.dmx[i];
         if (ch.type != DmxType::Disabled)
         {
-            strobes[i] = new Strobe(ch.pin, ch.pulse, LOW, ch.type == DmxType::Dimmable);
+            strobes[i] = new Strobe(ch.pin, ch.pulse, ch.level, ch.type == DmxType::Dimmable);
         }
         else
         {

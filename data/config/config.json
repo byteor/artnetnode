@@ -14,7 +14,8 @@
 		{
 			"channel": 1,
 			"type": 2,
-			"pin": 2,
+			"pin": 5,
+			"level": 1,
 			"pulse": 20,
 			"threshold": 127,
 			"multiplier": 5

@@ -32,6 +32,8 @@ typedef struct
     uint16_t multiplier;
     // Pin
     uint8_t pin;
+    // Active level: 0=LOW, 1=HIGH
+    uint8_t level;
 } DmxChannel;
 #define MAX_DMX_CHANNELS 4
 
