@@ -83,8 +83,8 @@ void Board::start()
     Serial.println("mDNS is set up: " + conf.host);
     // OTA
     //Send OTA events to the browser
-    /*
-    ArduinoOTA.onStart([this]() { events->send("Update Start", "ota"); });
+
+    /*  ArduinoOTA.onStart([this]() { events->send("Update Start", "ota"); });
     ArduinoOTA.onEnd([this]() { events->send("Update End", "ota"); });
     ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total) {
         char p[32];
@@ -106,9 +106,8 @@ void Board::start()
     ArduinoOTA.setHostname(conf.host.c_str());
     ArduinoOTA.begin();
     Serial.println("OTA is set up");
-   server->addHandler(events);
+   server->addHandler(events); */
 
-*/
     // Start web server
     server->on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
@@ -266,7 +265,6 @@ void Board::setupConfigPages()
     });
     wifiHandler->setMethod(HTTP_POST);
     server->addHandler(wifiHandler);
-
 }
 
 // Captive Portal
@@ -334,6 +332,9 @@ void Board::handle()
     if (isRestartPending)
     {
         Serial.println("Reboot...");
+        for (Strobe *strobe : strobes)
+            if (strobe)
+                strobe->stop();
         delay(200);
         ESP.restart();
     }
