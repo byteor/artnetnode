@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import { Router } from 'preact-router';
+import { Router, route } from 'preact-router';
 import { view } from 'preact-easy-state';
 
 import Header from './header';
@@ -18,9 +18,13 @@ class App extends Component {
    *	@param {string} event.url	The newly routed URL
    */
   handleRoute = e => {
-    this.setState({
-      currentUrl: e.url,
-    });
+    if (e.url === '/index.html') {
+      route('/wifi', true);
+    } else {
+      this.setState({
+        currentUrl: e.url,
+      });
+    }
   };
 
   componentDidMount = () => {
@@ -32,7 +36,7 @@ class App extends Component {
   render() {
     return (
       <div id="app">
-        <Progress show={store.isLoading}/>
+        <Progress show={store.isLoading} />
         <Header selectedRoute={this.state.currentUrl} />
         <Router onChange={this.handleRoute}>
           <Home path="/" />

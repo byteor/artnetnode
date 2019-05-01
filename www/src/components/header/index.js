@@ -76,26 +76,28 @@ export default class Header extends Component {
         </TopAppBar>
         <Drawer modal ref={this.drawerRef}>
           <Drawer.DrawerContent>
-            <Drawer.DrawerItem selected={props.selectedRoute === '/'} onClick={this.goHome}>
-              <List.ItemGraphic>home</List.ItemGraphic>
-              Dashboard
+            <div tabIndex={0}>
+              <Drawer.DrawerItem selected={props.selectedRoute === '/'} onClick={this.goHome}>
+                <List.ItemGraphic>home</List.ItemGraphic>
+                Dashboard
             </Drawer.DrawerItem>
-{/*             <Drawer.DrawerItem selected={props.selectedRoute === '/net'} onClick={this.goToNetwork}>
+              {/*             <Drawer.DrawerItem selected={props.selectedRoute === '/net'} onClick={this.goToNetwork}>
               <List.ItemGraphic>settings_ethernet</List.ItemGraphic>
               Network
             </Drawer.DrawerItem> */}
-            <Drawer.DrawerItem selected={props.selectedRoute === '/wifi'} onClick={this.goToWiFi}>
-              <List.ItemGraphic>wifi</List.ItemGraphic>
-              WiFi
+              <Drawer.DrawerItem selected={props.selectedRoute === '/wifi'} onClick={this.goToWiFi}>
+                <List.ItemGraphic>wifi</List.ItemGraphic>
+                WiFi
             </Drawer.DrawerItem>
-            <Drawer.DrawerItem selected={props.selectedRoute === '/dmx'} onClick={this.goToDMX}>
-              <List.ItemGraphic>settings_remote</List.ItemGraphic>
-              DMX
+              <Drawer.DrawerItem selected={props.selectedRoute === '/dmx'} onClick={this.goToDMX}>
+                <List.ItemGraphic>settings_remote</List.ItemGraphic>
+                DMX
             </Drawer.DrawerItem>
-            <Drawer.DrawerItem selected={props.selectedRoute === '/hardware'} onClick={this.goToHW}>
-              <List.ItemGraphic>developer_board</List.ItemGraphic>
-              Board
+              <Drawer.DrawerItem selected={props.selectedRoute === '/hardware'} onClick={this.goToHW}>
+                <List.ItemGraphic>developer_board</List.ItemGraphic>
+                Board
             </Drawer.DrawerItem>
+            </div>
           </Drawer.DrawerContent>
         </Drawer>
 

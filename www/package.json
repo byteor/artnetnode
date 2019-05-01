@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "if-env NODE_ENV=production && npm run -s serve || npm run -s dev",
-    "build": "rimraf ../data/www && preact build --no-prerender && copyfiles -u 1 --exclude \"./build/**/*.map.gz\" \"./build/**/*\" ../data/www",
+    "build": "rimraf ../data/www && preact build --no-prerender && copyfiles -u 1 --exclude \"./build/**/*.map.gz\" --exclude \"./build/assets/*.*\" \"./build/**/*\" ../data/www",
     "serve": "preact build && preact serve",
     "dev": "preact watch",
     "lint": "eslint src"
@@ -29,6 +29,7 @@
     "eslint-config-synacor": "^1.1.0",
     "if-env": "^1.0.0",
     "preact-cli": "^2.0.0",
+    "preact-cli-plugin-async": "^2.0.0",
     "rimraf": "^2.6.3"
   },
   "dependencies": {

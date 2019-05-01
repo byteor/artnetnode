@@ -1,4 +1,3 @@
-//fetchMock.mock('http://example.com', 200);
 
 export const getFoo = async () => {
   const res = await fetch('http://google.com');
@@ -20,43 +19,32 @@ export const wait = async howLong => {
 };
 
 export const load = async () => {
-  const data = {
-    host: 'foo-bar',
-    hw: { freq: 200 },
-    wifi: [
-      { ssid: 'ssid1', pwd: 'pwd1', dhcp: true, order: 4 },
-      { ssid: 'ssid2', pwd: 'pwd2', dhcp: false, ip: '111.222.333.4', netmask: '', dns: '', order: 1 },
-    ],
-    dmx: [
-      {
-        channel: 1,
-        type: 1,
-        pin: 2,
-        pulse: 20,
-        threshold: 127,
-        multiplier: 5,
-      },
-      {
-        channel: 1,
-        type: 2,
-        pin: 22,
-        pulse: 20,
-        threshold: 127,
-        multiplier: 5,
-      },
-    ],
-  };
-  data.wifi.forEach(net => (net._id = newId()));
-  await wait(1000); // TODO: remove the delay
-  return data;
+    const data = await fetch('/config').then(response => response.json());
+    console.log('response', data);
+    //const data = response.json;
+    data.wifi.forEach(net => (net._id = newId()));
+    return data;
+}
+
+const post = async (url, data) => {
+  return await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: data && JSON.stringify(data), // body data type must match "Content-Type" header
+  })
 };
 
 export const save = async config => {
   console.log('SAVE THE CONFIG:', config);
-  await wait(1000); // TODO: remove the delay
+  return await post('/config', config);
 };
 
 export const restart = async () => {
   // besides calling the API we need to wait for about 5-10 seconds
+  await post('/restart');
   await wait(5000);
 };
+
+

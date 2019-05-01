@@ -7,7 +7,8 @@
 		{
 			"ssid": "Lom",
 			"pass": "qwerasdfzxcv",
-			"dhcp": true
+			"dhcp": true,
+			"order": 1
 		}
 	],
 	"dmx": [
@@ -16,7 +17,7 @@
 			"type": 2,
 			"pin": 5,
 			"level": 1,
-			"pulse": 20,
+			"pulse": 10,
 			"threshold": 127,
 			"multiplier": 5
 		}
