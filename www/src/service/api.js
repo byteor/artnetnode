@@ -24,8 +24,8 @@ export const load = async () => {
     host: 'foo-bar',
     hw: { freq: 200 },
     wifi: [
-      { ssid: 'ssid1', pwd: 'pwd1', dhcp: true },
-      { ssid: 'ssid2', pwd: 'pwd2', dhcp: false, ip: '111.222.333.4', netmask: '', dns: '' },
+      { ssid: 'ssid1', pwd: 'pwd1', dhcp: true, order: 4 },
+      { ssid: 'ssid2', pwd: 'pwd2', dhcp: false, ip: '111.222.333.4', netmask: '', dns: '', order: 1 },
     ],
     dmx: [
       {

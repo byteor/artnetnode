@@ -53,12 +53,13 @@ void Board::restart()
 void Board::start()
 {
     Serial.begin(115200);
-    Serial.println("");
+    Serial.println("starting up...");
     //Serial.setDebugOutput(true);
     SPIFFS.begin();
-
     // Parse config
     conf.load(CONFIG_FILE);
+
+    delay(200);
 
     // Start a captive portal if can't connect to WiFi
     bool connected = false;
@@ -144,12 +145,6 @@ void Board::start()
     }
 
     if (!udpHandler->start(UDP_PORT, [this](int channel, int value) {
-            Serial.print("[");
-            Serial.print(channel + 1);
-            Serial.print("]=");
-            Serial.print(value);
-            Serial.println();
-
             for (int i = 0; i < MAX_DMX_CHANNELS; i++)
             {
                 // data array is zero-based when DMX channels start with "1"
@@ -158,6 +153,12 @@ void Board::start()
                 DmxChannel ch = conf.dmx[i];
                 if (channel == ch.channel - 1 && ch.type != DmxType::Disabled)
                 {
+                    Serial.print("[");
+                    Serial.print(ch.channel);
+                    Serial.print("]=");
+                    Serial.print(value);
+                    Serial.print(" /value");
+                    Serial.println();
                     if (ch.type == DmxType::Binary)
                     {
                         if (value >= ch.threshold)
@@ -173,12 +174,17 @@ void Board::start()
                     }
                     else if (ch.type == DmxType::Dimmable)
                     {
-                        Serial.printf("Level: %d\r\n", value);
                         value == 0 ? strobes[i]->stop() : strobes[i]->start(value);
                     }
                 }
                 if (channel == ch.channel && ch.pulse > 0)
                 {
+                    Serial.print("[");
+                    Serial.print(ch.channel + 1);
+                    Serial.print("]=");
+                    Serial.print(value);
+                    Serial.print(" /pulse");
+                    Serial.println();
                     strobes[i]->setDuration(ch.pulse);
                     strobes[i]->setInterval(value * ch.multiplier);
                 }

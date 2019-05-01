@@ -77,6 +77,7 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
         net["ssid"] = wifi[i].ssid;
         net["pass"] = wifi[i].pass;
         net["dhcp"] = wifi[i].dhcp;
+        net["order"] = wifi[i].order;
     }
     // DMX
     JsonArray &array2 = root.createNestedArray("dmx");
@@ -106,6 +107,7 @@ bool Config::configFromJson(JsonObject &object)
         net.ssid = "";
         net.pass = "";
         net.dhcp = false;
+        net.order = 0;
     }
     Serial.println("Networks found:" + String(nets.size(), DEC));
     wifiCount = 0;
@@ -116,10 +118,16 @@ bool Config::configFromJson(JsonObject &object)
             wifi[wifiCount].ssid = net.get<String>("ssid");
             wifi[wifiCount].pass = net.get<String>("pass");
             wifi[wifiCount].dhcp = net.get<bool>("dhcp");
-            Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
+            wifi[wifiCount].order = net.get<uint8_t>("order");
+            Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + "(" + wifi[wifiCount].order + ")" + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
             wifiCount++;
         }
     }
+    qsort(wifi, min(wifiCount, MAX_NETWORKS), sizeof(WiFiNet), [](const void *a, const void *b) {
+        WiFiNet *netA = (WiFiNet *)a;
+        WiFiNet *netB = (WiFiNet *)b;
+        return netA->order - netB->order;
+    });
 
     // DMX
     JsonArray &channels = object["dmx"];

@@ -20,6 +20,10 @@ import 'preact-material-components/TextField/style.css';
 import Switch from 'preact-material-components/Switch';
 import 'preact-material-components/Switch/style.css';
 
+import Select from 'preact-material-components/Select';
+import 'preact-material-components/Menu/style.css';
+import 'preact-material-components/Select/style.css';
+
 import { view } from 'preact-easy-state';
 
 import store from '../../service/store';
@@ -47,7 +51,7 @@ const WiFiNetwork = ({ network, onRemove, onEdit }) => (
 
 const WiFiNetworks = ({ networks, onRemove, onEdit }) => (
   <List avatar-list={true} two-line={true}>
-    {networks.map(
+    {networks.sort((a, b) => a.order - b.order).map(
       net => net && <WiFiNetwork key={net.ssid} network={net} onRemove={onRemove(net)} onEdit={onEdit(net)} />,
     )}
   </List>
@@ -94,6 +98,16 @@ class EditNetwork extends Component {
           <div class={`${style.dialogBody}`}>
             <TextField label="SSID" value={network.ssid} onInput={linkState(this, 'network.ssid')} />
             <TextField label="Password" value={network.pwd} onInput={linkState(this, 'network.pwd')} />
+            <Select label="Order" selectedIndex={network.order-1} onInput={linkState(this, 'network.order')} >
+              <Select.Item>1</Select.Item>
+              <Select.Item>2</Select.Item>
+              <Select.Item>3</Select.Item>
+              <Select.Item>4</Select.Item>
+              <Select.Item>5</Select.Item>
+              <Select.Item>6</Select.Item>
+              <Select.Item>7</Select.Item>
+              <Select.Item>8</Select.Item>
+            </Select>
             <div>
               <span>DHCP</span>
               <Switch disabled checked />
@@ -114,7 +128,7 @@ class EditNetwork extends Component {
 }
 
 class WiFi extends Component {
-  state = {   
+  state = {
     showAddDialog: false,
     showEditDialog: false,
   };
@@ -141,7 +155,7 @@ class WiFi extends Component {
       const { wifi } = store.config;
       for (let i = 0; i < wifi.length; i++) {
         if (wifi[i] && wifi[i].ssid === this.editWifi.ssid) {
-          wifi.splice(i,1);
+          wifi.splice(i, 1);
           break;
         }
       }
@@ -162,6 +176,7 @@ class WiFi extends Component {
         wifi[i].ssid = net.ssid;
         wifi[i].pwd = net.pwd;
         wifi[i].dhcp = net.dhcp;
+        wifi[i].order = net.order;
 
         console.log('U=', i, wifi[i]);
         break;
@@ -177,7 +192,7 @@ class WiFi extends Component {
 
   onWifiAdd = net => {
     net._id = store.newId();
-      
+
     store.config.wifi = [...store.config.wifi, net];
     this.setState(oldState => ({
       ...oldState,

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // default strobe pulse length, ms
-#define DEFAULT_STROBE_PULSE 20
+#define DEFAULT_STROBE_PULSE 5
 
 class Strobe
 {

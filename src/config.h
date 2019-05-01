@@ -13,6 +13,7 @@ typedef struct
     String ssid;
     String pass;
     bool dhcp;
+    uint8_t order;
 } WiFiNet;
 #define MAX_NETWORKS 8
 
