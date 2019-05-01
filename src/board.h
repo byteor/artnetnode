@@ -22,6 +22,9 @@ extern "C"
 #endif
 */
 #define UDP_PORT 6454 // ArtNet UDP port
+#define WWW_PORT 80     // WWW port
+#define DNS_PORT 53
+
 #define CONFIG_FILE "config.json"
 
 class Board
@@ -30,13 +33,10 @@ class Board
 
 protected:
     bool isRestartPending = false;
-    const uint16_t WWW_PORT = 80;
     AsyncWebServer *server = new AsyncWebServer(WWW_PORT);
     DNSServer dns;
     Strobe *strobes[MAX_DMX_CHANNELS];
     UdpHandler *udpHandler;
-    // DNS server
-    const byte DNS_PORT = 53;
 
     const char *AP_PASS = "secret"; // Access point mode password
 

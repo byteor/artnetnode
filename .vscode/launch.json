@@ -12,8 +12,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "/home/andrey/Projects/esp8266/artnetnode/.pioenvs/nodemcuv2/firmware.elf",
-            "toolchainBinDir": "/home/andrey/.platformio/packages/toolchain-xtensa/bin",
+            "executable": "c:/Users/admin/Documents/PlatformIO/Projects/ArtNetNode/.pioenvs/nodemcuv2/firmware.elf",
+            "toolchainBinDir": "",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug"
@@ -24,8 +24,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "/home/andrey/Projects/esp8266/artnetnode/.pioenvs/nodemcuv2/firmware.elf",
-            "toolchainBinDir": "/home/andrey/.platformio/packages/toolchain-xtensa/bin",
+            "executable": "c:/Users/admin/Documents/PlatformIO/Projects/ArtNetNode/.pioenvs/nodemcuv2/firmware.elf",
+            "toolchainBinDir": "",
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

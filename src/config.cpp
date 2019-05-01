@@ -77,6 +77,7 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
         net["ssid"] = wifi[i].ssid;
         net["pass"] = wifi[i].pass;
         net["dhcp"] = wifi[i].dhcp;
+        net["order"] = wifi[i].order;
     }
     // DMX
     JsonArray &array2 = root.createNestedArray("dmx");
@@ -86,6 +87,7 @@ JsonObject &Config::configToJson(JsonBuffer &doc)
         ch["channel"] = dmx[i].channel;
         ch["type"] = (int)dmx[i].type;
         ch["pin"] = dmx[i].pin;
+        ch["level"] = dmx[i].level;
         ch["pulse"] = dmx[i].pulse;
         ch["multiplier"] = dmx[i].multiplier;
         ch["threshold"] = dmx[i].threshold;
@@ -105,6 +107,7 @@ bool Config::configFromJson(JsonObject &object)
         net.ssid = "";
         net.pass = "";
         net.dhcp = false;
+        net.order = 0;
     }
     Serial.println("Networks found:" + String(nets.size(), DEC));
     wifiCount = 0;
@@ -115,10 +118,16 @@ bool Config::configFromJson(JsonObject &object)
             wifi[wifiCount].ssid = net.get<String>("ssid");
             wifi[wifiCount].pass = net.get<String>("pass");
             wifi[wifiCount].dhcp = net.get<bool>("dhcp");
-            Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
+            wifi[wifiCount].order = net.get<uint8_t>("order");
+            Serial.println("Networks[" + String(wifiCount, DEC) + "]: " + "(" + wifi[wifiCount].order + ")" + wifi[wifiCount].ssid + " " + wifi[wifiCount].pass);
             wifiCount++;
         }
     }
+    qsort(wifi, min(wifiCount, MAX_NETWORKS), sizeof(WiFiNet), [](const void *a, const void *b) {
+        WiFiNet *netA = (WiFiNet *)a;
+        WiFiNet *netB = (WiFiNet *)b;
+        return netA->order - netB->order;
+    });
 
     // DMX
     JsonArray &channels = object["dmx"];
@@ -127,6 +136,7 @@ bool Config::configFromJson(JsonObject &object)
         channel.channel = 0;
         channel.pin = 0;
         channel.pulse = 0;
+        channel.level = LOW;
         channel.type = DmxType::Disabled;
         channel.threshold = 0;
         channel.multiplier = 0;
@@ -141,6 +151,7 @@ bool Config::configFromJson(JsonObject &object)
             dmx[dmxCount].channel = channel.get<uint8_t>("channel");
             dmx[dmxCount].threshold = channel.get<uint8_t>("threshold");
             dmx[dmxCount].pin = channel.get<uint8_t>("pin");
+            dmx[dmxCount].level = channel.get<uint8_t>("level");    // only the least bit counts
             dmx[dmxCount].pulse = channel.get<uint16_t>("pulse");
             dmx[dmxCount].multiplier = channel.get<uint16_t>("multiplier");
             Serial.println("DMX[" + String(dmxCount, DEC) + "]: " + String(dmx[dmxCount].type, DEC) + " " + String(dmx[dmxCount].channel, DEC));

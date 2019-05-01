@@ -13,6 +13,7 @@ typedef struct
     String ssid;
     String pass;
     bool dhcp;
+    uint8_t order;
 } WiFiNet;
 #define MAX_NETWORKS 8
 
@@ -32,6 +33,8 @@ typedef struct
     uint16_t multiplier;
     // Pin
     uint8_t pin;
+    // Active level: 0=LOW, 1=HIGH
+    uint8_t level;
 } DmxChannel;
 #define MAX_DMX_CHANNELS 4
 
