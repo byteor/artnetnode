@@ -14,9 +14,9 @@
 	"dmx": [
 		{
 			"channel": 1,
-			"type": 2,
+			"type": "DIMMABLE",
 			"pin": 5,
-			"level": 1,
+			"level": "HIGH",
 			"pulse": 10,
 			"threshold": 127,
 			"multiplier": 5
